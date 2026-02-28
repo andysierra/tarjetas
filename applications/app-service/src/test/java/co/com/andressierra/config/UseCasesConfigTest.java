@@ -1,6 +1,8 @@
 package co.com.andressierra.config;
 
+import co.com.andressierra.model.card.gateways.CardRepository;
 import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.mock;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +31,11 @@ class UseCasesConfigTest {
     @Configuration
     @Import(UseCasesConfig.class)
     static class TestConfig {
+
+        @Bean
+        public CardRepository cardRepository() {
+            return mock(CardRepository.class);
+        }
 
         @Bean
         public MyUseCase myUseCase() {
