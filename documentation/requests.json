@@ -1,0 +1,8 @@
+curl -X POST http://localhost:8080/api/v1/cards \                                                                                                                                                  -H "Content-Type: application/json" \
+-d '{
+"pan": "4567890123456789",
+"cardholderName": "Andres Sierra",
+"cardholderId": "1234567890",
+"cardType": "CREDIT",
+"phoneNumber": "3001234567"
+}'

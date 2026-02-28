@@ -3,6 +3,7 @@ package co.com.andressierra.api;
 import co.com.andressierra.api.mapper.Mapper;
 import co.com.andressierra.api.rest.ResponseBuilder;
 import co.com.andressierra.api.rest.request.CreateCardRequest;
+import co.com.andressierra.model.messages.MessagesEnum;
 import co.com.andressierra.usecase.createcard.CreateCardUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,7 @@ public class Handler {
     public Mono<ServerResponse> createCard(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CreateCardRequest.class)
                 .flatMap(request -> createCardUseCase.create(Mapper.toCommand(request)))
-                .flatMap(card -> ResponseBuilder.success(Mapper.toResponse(card), MessagesEnum.CREATED_SUCCESS));
+                .flatMap(card -> ResponseBuilder.success(Mapper.toResponse(card), MessagesEnum.CARD_CREATED));
     }
 
     public Mono<ServerResponse> getCard(ServerRequest serverRequest) {

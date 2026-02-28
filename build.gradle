@@ -35,3 +35,20 @@ sonar {
 }
 
 apply from: './main.gradle'
+
+tasks.named('validateStructure').configure {
+    finalizedBy 'fixScaffoldImports'
+}
+
+tasks.register('fixScaffoldImports') {
+    doLast {
+        def testDir = file("applications/app-service/src/test/java/co/com/andressierra")
+        testDir.eachFileMatch(~/.*\.java/) { file ->
+            def content = file.text
+            if (content.contains('co.com.bancolombia.Utils')) {
+                file.text = content.replace('co.com.bancolombia.Utils', 'co.com.andressierra.Utils')
+                logger.lifecycle("Fixed imports in ${file.name}")
+            }
+        }
+    }
+}
