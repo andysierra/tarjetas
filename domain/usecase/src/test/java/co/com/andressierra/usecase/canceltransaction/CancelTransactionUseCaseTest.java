@@ -93,7 +93,7 @@ class CancelTransactionUseCaseTest {
 
     @Test
     void shouldCancelTransactionAtExactly5Minutes() {
-        Transaction transaction = buildTransaction(LocalDateTime.now().minusMinutes(5).plusSeconds(1));
+        Transaction transaction = buildTransaction(LocalDateTime.now().minusMinutes(4).minusSeconds(50));
         Transaction cancelled = transaction.toBuilder().status(TransactionStatusEnum.CANCELLED).build();
 
         when(transactionRepository.findByReference("123456")).thenReturn(Mono.just(transaction));

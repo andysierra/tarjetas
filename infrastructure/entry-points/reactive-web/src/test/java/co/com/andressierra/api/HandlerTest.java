@@ -353,4 +353,122 @@ class HandlerTest {
                 .assertNext(res -> assertEquals(400, res.statusCode().value()))
                 .verifyComplete();
     }
+
+    @Test
+    void shouldReturn400WhenCreateCardWithBlankPan() {
+        CreateCardRequest request = new CreateCardRequest();
+        request.setCardholderName("Test User");
+        request.setCardholderId("1234567890");
+        request.setCardType(CardTypeEnum.CREDIT);
+        request.setPhoneNumber("3001234567");
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.createCard(serverRequest))
+                .assertNext(res -> assertEquals(400, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturn400WhenCreateCardWithInvalidPanFormat() {
+        CreateCardRequest request = new CreateCardRequest();
+        request.setPan("123");
+        request.setCardholderName("Test User");
+        request.setCardholderId("1234567890");
+        request.setCardType(CardTypeEnum.CREDIT);
+        request.setPhoneNumber("3001234567");
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.createCard(serverRequest))
+                .assertNext(res -> assertEquals(400, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturn400WhenCreateCardWithInvalidPhoneNumber() {
+        CreateCardRequest request = new CreateCardRequest();
+        request.setPan("4567890123456789");
+        request.setCardholderName("Test User");
+        request.setCardholderId("1234567890");
+        request.setCardType(CardTypeEnum.CREDIT);
+        request.setPhoneNumber("123");
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.createCard(serverRequest))
+                .assertNext(res -> assertEquals(400, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturn400WhenCreateCardWithNullCardType() {
+        CreateCardRequest request = new CreateCardRequest();
+        request.setPan("4567890123456789");
+        request.setCardholderName("Test User");
+        request.setCardholderId("1234567890");
+        request.setPhoneNumber("3001234567");
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.createCard(serverRequest))
+                .assertNext(res -> assertEquals(400, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturn400WhenEnrollWithNullValidationNumber() {
+        EnrollCardRequest request = new EnrollCardRequest();
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .pathVariable("identifier", "a3f7b2c1e9d04f58")
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.enrollCard(serverRequest))
+                .assertNext(res -> assertEquals(400, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturn400WhenCreateTransactionWithBlankIdentifier() {
+        CreateTransactionRequest request = new CreateTransactionRequest(
+                "", "123456", new BigDecimal("50000.00"), "Calle 123");
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.createTransaction(serverRequest))
+                .assertNext(res -> assertEquals(400, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturn400WhenCreateTransactionWithInvalidReference() {
+        CreateTransactionRequest request = new CreateTransactionRequest(
+                "a3f7b2c1e9d04f58", "abc", new BigDecimal("50000.00"), "Calle 123");
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.createTransaction(serverRequest))
+                .assertNext(res -> assertEquals(400, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturn400WhenCreateTransactionWithNegativeAmount() {
+        CreateTransactionRequest request = new CreateTransactionRequest(
+                "a3f7b2c1e9d04f58", "123456", new BigDecimal("-100"), "Calle 123");
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.createTransaction(serverRequest))
+                .assertNext(res -> assertEquals(400, res.statusCode().value()))
+                .verifyComplete();
+    }
 }

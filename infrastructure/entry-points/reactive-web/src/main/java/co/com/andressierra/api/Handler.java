@@ -1,6 +1,7 @@
 package co.com.andressierra.api;
 
-import co.com.andressierra.api.mapper.Mapper;
+import co.com.andressierra.api.helpers.Mapper;
+import co.com.andressierra.api.helpers.RestValidator;
 import co.com.andressierra.api.rest.ResponseBuilder;
 import co.com.andressierra.api.rest.request.CreateCardRequest;
 import co.com.andressierra.api.rest.request.CreateTransactionRequest;
@@ -36,6 +37,7 @@ public class Handler {
 
     public Mono<ServerResponse> createCard(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CreateCardRequest.class)
+                .map(RestValidator::validate)
                 .flatMap(request -> createCardUseCase.create(Mapper.toCommand(request)))
                 .flatMap(card -> ResponseBuilder.success(Mapper.toResponse(card), MessagesEnum.CARD_CREATED))
                 .onErrorResume(ResponseBuilder::handleError);
@@ -44,6 +46,7 @@ public class Handler {
     public Mono<ServerResponse> enrollCard(ServerRequest serverRequest) {
         String identifier = serverRequest.pathVariable(IDENTIFIER_PATH_VARIABLE);
         return serverRequest.bodyToMono(EnrollCardRequest.class)
+                .map(RestValidator::validate)
                 .flatMap(request -> enrollCardUseCase.enroll(Mapper.toCommand(request, identifier)))
                 .flatMap(card -> ResponseBuilder.success(Mapper.toEnrollResponse(card), MessagesEnum.CARD_ENROLLED))
                 .onErrorResume(ResponseBuilder::handleError);
@@ -65,6 +68,7 @@ public class Handler {
 
     public Mono<ServerResponse> createTransaction(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CreateTransactionRequest.class)
+                .map(RestValidator::validate)
                 .flatMap(request -> createTransactionUseCase.create(Mapper.toCommand(request)))
                 .flatMap(tx -> ResponseBuilder.success(Mapper.toCreateTransactionResponse(tx), MessagesEnum.TRANSACTION_CREATED))
                 .onErrorResume(ResponseBuilder::handleError);

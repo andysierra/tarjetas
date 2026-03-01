@@ -1,4 +1,4 @@
-package co.com.andressierra.api.mapper;
+package co.com.andressierra.api.helpers;
 
 import co.com.andressierra.api.rest.request.CreateCardRequest;
 import co.com.andressierra.api.rest.request.CreateTransactionRequest;

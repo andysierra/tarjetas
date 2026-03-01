@@ -18,6 +18,7 @@ public enum MessagesEnum {
     CARD_NOT_ENROLLED(400, "Tarjeta no enrolada", "42"),
     INVALID_REFERENCE(400, "Numero de referencia invalido", "43"),
     TRANSACTION_CANNOT_CANCEL(400, "No se puede anular transaccion por su antiguedad", "44"),
+    BAD_REQUEST(400, "Datos de entrada invalidos", "40"),
     INVALID_VALIDATION_NUMBER(400, "Numero de validacion invalido", "45"),
     CARD_ALREADY_EXISTS(409, "La tarjeta ya existe en el sistema", "46"),
     TRANSACTION_ALREADY_EXISTS(409, "El numero de referencia ya existe", "47"),
