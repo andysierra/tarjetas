@@ -1,32 +1,35 @@
 package co.com.andressierra.api;
 
 import co.com.andressierra.api.rest.request.CreateCardRequest;
+import co.com.andressierra.api.rest.request.EnrollCardRequest;
 import co.com.andressierra.model.card.Card;
 import co.com.andressierra.model.card.enums.CardTypeEnum;
+import co.com.andressierra.model.exception.BusinessException;
 import co.com.andressierra.usecase.createcard.CreateCardUseCase;
+import co.com.andressierra.usecase.enrollcard.EnrollCardUseCase;
+import java.time.LocalDateTime;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.reactive.function.server.MockServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
-import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.reactive.function.server.MockServerRequest;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
 class HandlerTest {
 
     @Mock
     private CreateCardUseCase createCardUseCase;
+
+    @Mock
+    private EnrollCardUseCase enrollCardUseCase;
 
     @InjectMocks
     private Handler handler;
@@ -62,12 +65,60 @@ class HandlerTest {
         MockServerRequest serverRequest = MockServerRequest.builder()
                 .body(Mono.just(request));
 
-        Mono<ServerResponse> response = handler.createCard(serverRequest);
-
-        StepVerifier.create(response)
+        StepVerifier.create(handler.createCard(serverRequest))
                 .assertNext(res -> assertEquals(201, res.statusCode().value()))
                 .verifyComplete();
 
         verify(createCardUseCase).create(any());
+    }
+
+    @Test
+    void shouldEnrollCard() {
+        Card enrolledCard = card.toBuilder().status("ENROLLED").build();
+        EnrollCardRequest request = new EnrollCardRequest(42);
+
+        when(enrollCardUseCase.enroll(any())).thenReturn(Mono.just(enrolledCard));
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .pathVariable("identifier", "a3f7b2c1e9d04f58")
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.enrollCard(serverRequest))
+                .assertNext(res -> assertEquals(200, res.statusCode().value()))
+                .verifyComplete();
+
+        verify(enrollCardUseCase).enroll(any());
+    }
+
+    @Test
+    void shouldReturn404WhenCardNotFoundOnEnroll() {
+        EnrollCardRequest request = new EnrollCardRequest(42);
+
+        when(enrollCardUseCase.enroll(any()))
+                .thenReturn(Mono.error(new BusinessException("Tarjeta no existe", "01", 404)));
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .pathVariable("identifier", "nonexistent12345")
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.enrollCard(serverRequest))
+                .assertNext(res -> assertEquals(404, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturn400WhenInvalidValidationNumber() {
+        EnrollCardRequest request = new EnrollCardRequest(99);
+
+        when(enrollCardUseCase.enroll(any()))
+                .thenReturn(Mono.error(new BusinessException("Numero de validacion invalido", "02", 400)));
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .pathVariable("identifier", "a3f7b2c1e9d04f58")
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.enrollCard(serverRequest))
+                .assertNext(res -> assertEquals(400, res.statusCode().value()))
+                .verifyComplete();
     }
 }

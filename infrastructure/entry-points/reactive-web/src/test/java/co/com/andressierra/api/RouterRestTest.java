@@ -3,6 +3,7 @@ package co.com.andressierra.api;
 import co.com.andressierra.model.card.Card;
 import co.com.andressierra.model.card.enums.CardTypeEnum;
 import co.com.andressierra.usecase.createcard.CreateCardUseCase;
+import co.com.andressierra.usecase.enrollcard.EnrollCardUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
@@ -17,7 +18,10 @@ import java.time.LocalDateTime;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(classes = {RouterRest.class, Handler.class})
+@ContextConfiguration(classes = {
+        RouterRest.class,
+        Handler.class
+})
 @WebFluxTest
 class RouterRestTest {
 
@@ -28,6 +32,9 @@ class RouterRestTest {
 
     @MockitoBean
     private CreateCardUseCase createCardUseCase;
+
+    @MockitoBean
+    private EnrollCardUseCase enrollCardUseCase;
 
     @Test
     void createCard_shouldReturn201() {

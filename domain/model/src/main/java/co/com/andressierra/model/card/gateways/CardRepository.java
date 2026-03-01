@@ -4,5 +4,6 @@ import co.com.andressierra.model.card.Card;
 import reactor.core.publisher.Mono;
 
 public interface CardRepository {
-    public Mono<Card> save(Card card);
+    Mono<Card> save(Card card);
+    Mono<Card> findByIdentifier(String identifier);
 }

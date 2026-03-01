@@ -7,12 +7,27 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum MessagesEnum {
 
-    CARD_CREATED(201, "Exito creando la tarjeta de credito", "00"),
-    CARD_IDENTIFIER_ERROR(501, "Error: Card no pudo generar el identificador", "99");
+    CARD_CREATED(201, "Exito creando la tarjeta", "00"),
+    CARD_ENROLLED(200, "Exito enrolando la tarjeta", "00"),
+    CARD_NOT_FOUND(404, "Tarjeta no existe", "01"),
+    INVALID_VALIDATION_NUMBER(400, "Numero de validacion invalido", "02"),
+    CARD_ALREADY_EXISTS(409, "La tarjeta ya existe en el sistema", "01"),
+    PERSISTENCE_ERROR(409, "Hubo un error desconocido en persistencia", "01"),
+    CARD_IDENTIFIER_ERROR(501, "Error: Card no pudo generar el identificador", "99"),
+    UNKNOWN_ERROR(500, "ERROR: Se ha encontrado un error desconocido, estaremos reparandolo muy pronto", "99");
 
     private final int code;
 
     private final String message;
 
     private final String operationCode;
+
+    public static MessagesEnum findByClientCode(int clientCode) {
+        for (MessagesEnum value : values()) {
+            if (value.code == clientCode) {
+                return value;
+            }
+        }
+        return null;
+    }
 }

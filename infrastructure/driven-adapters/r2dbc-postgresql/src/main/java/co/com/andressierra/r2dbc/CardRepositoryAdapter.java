@@ -2,11 +2,15 @@ package co.com.andressierra.r2dbc;
 
 import co.com.andressierra.model.card.Card;
 import co.com.andressierra.model.card.gateways.CardRepository;
+import co.com.andressierra.model.exception.BusinessException;
+import co.com.andressierra.model.messages.MessagesEnum;
 import co.com.andressierra.r2dbc.entity.CardEntity;
 import co.com.andressierra.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.andressierra.r2dbc.reactiveRepository.MyReactiveRepository;
 import org.reactivecommons.utils.ObjectMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
 
 @Repository
 public class CardRepositoryAdapter extends ReactiveAdapterOperations<Card,CardEntity,Long,MyReactiveRepository>
@@ -14,5 +18,21 @@ public class CardRepositoryAdapter extends ReactiveAdapterOperations<Card,CardEn
 {
     public CardRepositoryAdapter(MyReactiveRepository repository, ObjectMapper mapper) {
         super(repository, mapper, d -> mapper.map(d, Card.class));
+    }
+
+    @Override
+    public Mono<Card> save(Card card) {
+        return super.save(card)
+                .onErrorMap(DataIntegrityViolationException.class, e -> toBusinessException(MessagesEnum.CARD_ALREADY_EXISTS))
+                .onErrorMap(e -> !(e instanceof BusinessException), e -> toBusinessException(MessagesEnum.PERSISTENCE_ERROR));
+    }
+
+    private BusinessException toBusinessException(MessagesEnum msg) {
+        return new BusinessException(msg.getMessage(), msg.getOperationCode(), msg.getCode());
+    }
+
+    @Override
+    public Mono<Card> findByIdentifier(String identifier) {
+        return repository.findByIdentifier(identifier).map(this::toEntity);
     }
 }
