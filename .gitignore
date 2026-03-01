@@ -337,3 +337,6 @@ build-cache
 
 # Custom
 ignore/
+
+# Claude Code
+.claude/
