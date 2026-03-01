@@ -31,6 +31,8 @@ public class CardEntity {
     @Column
     private Integer validationNumber;
     @Column
+    private String identifier;
+    @Column
     private String status;
     @Column
     private LocalDateTime createdAt;

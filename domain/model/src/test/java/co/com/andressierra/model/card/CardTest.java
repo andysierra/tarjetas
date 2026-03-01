@@ -1,11 +1,16 @@
 package co.com.andressierra.model.card;
 
 import co.com.andressierra.model.card.enums.CardTypeEnum;
+import co.com.andressierra.model.exception.BusinessException;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mockStatic;
 
 class CardTest {
 
@@ -47,38 +52,51 @@ class CardTest {
     }
 
     @Test
-    void getIdentifier_shouldReturnHexHash() {
-        Card card = buildCard("4567890123456789");
-        String identifier = card.getIdentifier();
+    void generateIdentifier_shouldReturnHexHash() {
+        LocalDateTime date = LocalDateTime.of(2026, 2, 28, 12, 0);
+        String identifier = Card.generateIdentifier("4567890123456789", date);
         assertNotNull(identifier);
         assertEquals(16, identifier.length());
         assertTrue(identifier.matches("[0-9a-f]+"));
     }
 
     @Test
-    void getIdentifier_samePanAndDate_shouldBeDeterministic() {
-        Card card1 = buildCard("4567890123456789");
-        Card card2 = buildCard("4567890123456789");
-        assertEquals(card1.getIdentifier(), card2.getIdentifier());
+    void generateIdentifier_samePanAndDate_shouldBeDeterministic() {
+        LocalDateTime date = LocalDateTime.of(2026, 2, 28, 12, 0);
+        assertEquals(
+                Card.generateIdentifier("4567890123456789", date),
+                Card.generateIdentifier("4567890123456789", date)
+        );
     }
 
     @Test
-    void getIdentifier_differentPan_shouldBeDifferent() {
-        Card card1 = buildCard("4567890123456789");
-        Card card2 = buildCard("9876543210123456");
-        assertNotEquals(card1.getIdentifier(), card2.getIdentifier());
+    void generateIdentifier_differentPan_shouldBeDifferent() {
+        LocalDateTime date = LocalDateTime.of(2026, 2, 28, 12, 0);
+        assertNotEquals(
+                Card.generateIdentifier("4567890123456789", date),
+                Card.generateIdentifier("9876543210123456", date)
+        );
     }
 
     @Test
-    void getIdentifier_withNullPan_shouldReturnNull() {
-        Card card = buildCard(null);
-        assertNull(card.getIdentifier());
+    void generateIdentifier_withNullPan_shouldReturnNull() {
+        assertNull(Card.generateIdentifier(null, LocalDateTime.now()));
     }
 
     @Test
-    void getIdentifier_withNullCreatedAt_shouldReturnNull() {
-        Card card = buildCard("4567890123456789");
-        card.setCreatedAt(null);
-        assertNull(card.getIdentifier());
+    void generateIdentifier_withNullCreatedAt_shouldReturnNull() {
+        assertNull(Card.generateIdentifier("4567890123456789", null));
+    }
+
+    @Test
+    void generateIdentifier_shouldThrowBusinessExceptionWhenAlgorithmNotFound() {
+        try (MockedStatic<MessageDigest> mockedDigest = mockStatic(MessageDigest.class)) {
+            mockedDigest.when(() -> MessageDigest.getInstance("SHA-256"))
+                    .thenThrow(new NoSuchAlgorithmException("SHA-256 not available"));
+
+            LocalDateTime now = LocalDateTime.now();
+            assertThrows(BusinessException.class,
+                    () -> Card.generateIdentifier("4567890123456789", now));
+        }
     }
 }

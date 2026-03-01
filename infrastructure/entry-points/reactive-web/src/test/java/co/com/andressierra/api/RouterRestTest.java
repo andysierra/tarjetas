@@ -38,6 +38,7 @@ class RouterRestTest {
                 .cardType(CardTypeEnum.CREDIT)
                 .phoneNumber("3001234567")
                 .validationNumber(42)
+                .identifier("a3f7b2c1e9d04f58")
                 .status("CREATED")
                 .createdAt(LocalDateTime.now())
                 .build();

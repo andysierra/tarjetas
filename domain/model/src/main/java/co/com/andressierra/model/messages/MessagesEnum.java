@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum MessagesEnum {
 
-    CARD_CREATED(201, "Exito creando la tarjeta de credito", "00");
+    CARD_CREATED(201, "Exito creando la tarjeta de credito", "00"),
+    CARD_IDENTIFIER_ERROR(501, "Error: Card no pudo generar el identificador", "99");
 
     private final int code;
 

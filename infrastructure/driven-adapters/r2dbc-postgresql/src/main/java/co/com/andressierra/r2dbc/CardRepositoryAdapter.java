@@ -9,10 +9,10 @@ import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<Card,CardEntity,Long,MyReactiveRepository>
+public class CardRepositoryAdapter extends ReactiveAdapterOperations<Card,CardEntity,Long,MyReactiveRepository>
         implements CardRepository
 {
-    public MyReactiveRepositoryAdapter(MyReactiveRepository repository, ObjectMapper mapper) {
+    public CardRepositoryAdapter(MyReactiveRepository repository, ObjectMapper mapper) {
         super(repository, mapper, d -> mapper.map(d, Card.class));
     }
 }

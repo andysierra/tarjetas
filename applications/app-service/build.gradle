@@ -27,3 +27,7 @@ bootJar {
     // Sets output jar name
     archiveFileName = "${project.getParent().getName()}.${archiveExtension.get()}"
 }
+
+configurations.testImplementation {
+    exclude group: 'io.projectreactor.tools', module: 'blockhound-junit-platform'
+}

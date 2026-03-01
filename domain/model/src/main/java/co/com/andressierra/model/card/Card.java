@@ -1,6 +1,8 @@
 package co.com.andressierra.model.card;
 
 import co.com.andressierra.model.card.enums.CardTypeEnum;
+import co.com.andressierra.model.exception.BusinessException;
+import co.com.andressierra.model.messages.MessagesEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,6 +28,7 @@ public class Card {
     private CardTypeEnum cardType;
     private String phoneNumber;
     private Integer validationNumber;
+    private String identifier;
     private String status;
     private LocalDateTime createdAt;
 
@@ -37,14 +40,15 @@ public class Card {
         return first6 + mask + last4;
     }
 
-    public String getIdentifier() {
+    public static String generateIdentifier(String pan, LocalDateTime createdAt) {
         if (pan == null || createdAt == null) return null;
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest((pan + createdAt.toLocalDate()).getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(hash).substring(0, 16);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            var error = MessagesEnum.CARD_IDENTIFIER_ERROR;
+            throw new BusinessException(error.getMessage(), error.getOperationCode(), error.getCode());
         }
     }
 }
