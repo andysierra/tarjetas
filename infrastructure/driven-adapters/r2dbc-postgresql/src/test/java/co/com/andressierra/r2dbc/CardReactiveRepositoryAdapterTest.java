@@ -1,10 +1,11 @@
 package co.com.andressierra.r2dbc;
 
 import co.com.andressierra.model.card.Card;
+import co.com.andressierra.model.card.enums.CardStatusEnum;
 import co.com.andressierra.model.card.enums.CardTypeEnum;
 import co.com.andressierra.model.exception.BusinessException;
 import co.com.andressierra.r2dbc.entity.CardEntity;
-import co.com.andressierra.r2dbc.reactiveRepository.MyReactiveRepository;
+import co.com.andressierra.r2dbc.reactiveRepository.CardReactiveRepository;
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -22,10 +23,10 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
-class CardRepositoryAdapterTest {
+class CardReactiveRepositoryAdapterTest {
 
     @Mock
-    private MyReactiveRepository repository;
+    private CardReactiveRepository repository;
 
     @Mock
     private ObjectMapper mapper;
@@ -47,7 +48,7 @@ class CardRepositoryAdapterTest {
                 .phoneNumber("3001234567")
                 .validationNumber(42)
                 .identifier("a3f7b2c1e9d04f58")
-                .status("CREATED")
+                .status(CardStatusEnum.CREATED)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -74,7 +75,7 @@ class CardRepositoryAdapterTest {
                 .assertNext(saved -> {
                     assertEquals("4567890123456789", saved.getPan());
                     assertEquals("a3f7b2c1e9d04f58", saved.getIdentifier());
-                    assertEquals("CREATED", saved.getStatus());
+                    assertEquals("CREATED", saved.getStatus().name());
                 })
                 .verifyComplete();
 

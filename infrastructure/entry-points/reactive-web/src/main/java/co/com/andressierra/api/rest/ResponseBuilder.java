@@ -31,6 +31,7 @@ public class ResponseBuilder {
         ResponseBuilder body = ResponseBuilder.builder()
                 .code(messagesEnum.getOperationCode())
                 .message(messagesEnum.getMessage())
+                .data("")
                 .build();
         return ServerResponse.status(HttpStatus.valueOf(messagesEnum.getCode()))
                 .bodyValue(body);

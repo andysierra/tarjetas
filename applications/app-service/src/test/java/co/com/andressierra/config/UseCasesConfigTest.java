@@ -1,6 +1,7 @@
 package co.com.andressierra.config;
 
 import co.com.andressierra.model.card.gateways.CardRepository;
+import co.com.andressierra.model.transaction.gateways.TransactionRepository;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.mock;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -35,6 +36,11 @@ class UseCasesConfigTest {
         @Bean
         public CardRepository cardRepository() {
             return mock(CardRepository.class);
+        }
+
+        @Bean
+        public TransactionRepository transactionRepository() {
+            return mock(TransactionRepository.class);
         }
 
         @Bean

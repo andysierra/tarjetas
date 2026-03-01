@@ -1,5 +1,6 @@
 package co.com.andressierra.api.rest.response;
 
+import co.com.andressierra.model.card.enums.CardStatusEnum;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -7,5 +8,5 @@ import lombok.Getter;
 @Builder
 public class DeleteCardResponse {
     private String identifier;
-    private String status;
+    private CardStatusEnum status;
 }

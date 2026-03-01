@@ -1,5 +1,6 @@
 package co.com.andressierra.model.card;
 
+import co.com.andressierra.model.card.enums.CardStatusEnum;
 import co.com.andressierra.model.card.enums.CardTypeEnum;
 import co.com.andressierra.model.exception.BusinessException;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ class CardTest {
                 .cardType(CardTypeEnum.CREDIT)
                 .phoneNumber("3001234567")
                 .validationNumber(42)
-                .status("CREATED")
+                .status(CardStatusEnum.CREATED)
                 .createdAt(LocalDateTime.of(2026, 2, 28, 12, 0))
                 .build();
     }

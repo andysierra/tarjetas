@@ -44,7 +44,7 @@ class DeleteCardUseCaseTest {
                 .phoneNumber("3001234567")
                 .validationNumber(42)
                 .identifier("a3f7b2c1e9d04f58")
-                .status(CardStatusEnum.ENROLLED.name())
+                .status(CardStatusEnum.ENROLLED)
                 .createdAt(LocalDateTime.now())
                 .build();
     }
@@ -56,7 +56,7 @@ class DeleteCardUseCaseTest {
         when(cardRepository.save(any(Card.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
         StepVerifier.create(deleteCardUseCase.delete("a3f7b2c1e9d04f58"))
-                .assertNext(result -> assertEquals(CardStatusEnum.INACTIVE.name(), result.getStatus()))
+                .assertNext(result -> assertEquals(CardStatusEnum.INACTIVE.name(), result.getStatus().name()))
                 .verifyComplete();
     }
 
@@ -72,7 +72,7 @@ class DeleteCardUseCaseTest {
 
         ArgumentCaptor<Card> captor = ArgumentCaptor.forClass(Card.class);
         verify(cardRepository).save(captor.capture());
-        assertEquals(CardStatusEnum.INACTIVE.name(), captor.getValue().getStatus());
+        assertEquals(CardStatusEnum.INACTIVE.name(), captor.getValue().getStatus().name());
     }
 
     @Test

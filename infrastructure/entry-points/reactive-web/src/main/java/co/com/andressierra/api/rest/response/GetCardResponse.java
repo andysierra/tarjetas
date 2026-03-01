@@ -1,5 +1,6 @@
 package co.com.andressierra.api.rest.response;
 
+import co.com.andressierra.model.card.enums.CardStatusEnum;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,5 +11,5 @@ public class GetCardResponse {
     private String cardholderName;
     private String cardholderId;
     private String phoneNumber;
-    private String status;
+    private CardStatusEnum status;
 }

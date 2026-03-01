@@ -1,8 +1,10 @@
 package co.com.andressierra.api;
 
 import co.com.andressierra.model.card.Card;
+import co.com.andressierra.model.card.enums.CardStatusEnum;
 import co.com.andressierra.model.card.enums.CardTypeEnum;
 import co.com.andressierra.usecase.createcard.CreateCardUseCase;
+import co.com.andressierra.usecase.createtransaction.CreateTransactionUseCase;
 import co.com.andressierra.usecase.deletecard.DeleteCardUseCase;
 import co.com.andressierra.usecase.enrollcard.EnrollCardUseCase;
 import co.com.andressierra.usecase.getcard.GetCardUseCase;
@@ -44,6 +46,9 @@ class RouterRestTest {
     @MockitoBean
     private DeleteCardUseCase deleteCardUseCase;
 
+    @MockitoBean
+    private CreateTransactionUseCase createTransactionUseCase;
+
     @Test
     void createCard_shouldReturn201() {
         Card card = Card.builder()
@@ -54,7 +59,7 @@ class RouterRestTest {
                 .phoneNumber("3001234567")
                 .validationNumber(42)
                 .identifier("a3f7b2c1e9d04f58")
-                .status("CREATED")
+                .status(CardStatusEnum.CREATED)
                 .createdAt(LocalDateTime.now())
                 .build();
 

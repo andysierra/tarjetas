@@ -1,6 +1,7 @@
 package co.com.andressierra.usecase.getcard;
 
 import co.com.andressierra.model.card.Card;
+import co.com.andressierra.model.card.enums.CardStatusEnum;
 import co.com.andressierra.model.card.enums.CardTypeEnum;
 import co.com.andressierra.model.card.gateways.CardRepository;
 import co.com.andressierra.model.exception.BusinessException;
@@ -41,7 +42,7 @@ class GetCardUseCaseTest {
                 .phoneNumber("3001234567")
                 .validationNumber(42)
                 .identifier("a3f7b2c1e9d04f58")
-                .status("CREATED")
+                .status(CardStatusEnum.CREATED)
                 .createdAt(LocalDateTime.now())
                 .build();
     }
@@ -57,7 +58,7 @@ class GetCardUseCaseTest {
                     assertEquals("Test User", result.getCardholderName());
                     assertEquals("1234567890", result.getCardholderId());
                     assertEquals("3001234567", result.getPhoneNumber());
-                    assertEquals("CREATED", result.getStatus());
+                    assertEquals("CREATED", result.getStatus().name());
                 })
                 .verifyComplete();
 

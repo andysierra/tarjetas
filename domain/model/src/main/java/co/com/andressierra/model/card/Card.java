@@ -1,5 +1,6 @@
 package co.com.andressierra.model.card;
 
+import co.com.andressierra.model.card.enums.CardStatusEnum;
 import co.com.andressierra.model.card.enums.CardTypeEnum;
 import co.com.andressierra.model.exception.BusinessException;
 import co.com.andressierra.model.messages.MessagesEnum;
@@ -29,7 +30,7 @@ public class Card {
     private String phoneNumber;
     private Integer validationNumber;
     private String identifier;
-    private String status;
+    private CardStatusEnum status;
     private LocalDateTime createdAt;
 
     public String getMaskedPan() {

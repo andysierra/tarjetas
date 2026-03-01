@@ -1,14 +1,20 @@
 package co.com.andressierra.api;
 
 import co.com.andressierra.api.rest.request.CreateCardRequest;
+import co.com.andressierra.api.rest.request.CreateTransactionRequest;
 import co.com.andressierra.api.rest.request.EnrollCardRequest;
 import co.com.andressierra.model.card.Card;
+import co.com.andressierra.model.card.enums.CardStatusEnum;
 import co.com.andressierra.model.card.enums.CardTypeEnum;
 import co.com.andressierra.model.exception.BusinessException;
+import co.com.andressierra.model.transaction.Transaction;
+import co.com.andressierra.model.transaction.enums.TransactionStatusEnum;
 import co.com.andressierra.usecase.createcard.CreateCardUseCase;
+import co.com.andressierra.usecase.createtransaction.CreateTransactionUseCase;
 import co.com.andressierra.usecase.deletecard.DeleteCardUseCase;
 import co.com.andressierra.usecase.enrollcard.EnrollCardUseCase;
 import co.com.andressierra.usecase.getcard.GetCardUseCase;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +45,9 @@ class HandlerTest {
     @Mock
     private DeleteCardUseCase deleteCardUseCase;
 
+    @Mock
+    private CreateTransactionUseCase createTransactionUseCase;
+
     @InjectMocks
     private Handler handler;
 
@@ -54,7 +63,7 @@ class HandlerTest {
                 .phoneNumber("3001234567")
                 .validationNumber(42)
                 .identifier("a3f7b2c1e9d04f58")
-                .status("CREATED")
+                .status(CardStatusEnum.CREATED)
                 .createdAt(LocalDateTime.now())
                 .build();
     }
@@ -82,7 +91,7 @@ class HandlerTest {
 
     @Test
     void shouldEnrollCard() {
-        Card enrolledCard = card.toBuilder().status("ENROLLED").build();
+        Card enrolledCard = card.toBuilder().status(CardStatusEnum.ENROLLED).build();
         EnrollCardRequest request = new EnrollCardRequest(42);
 
         when(enrollCardUseCase.enroll(any())).thenReturn(Mono.just(enrolledCard));
@@ -161,7 +170,7 @@ class HandlerTest {
 
     @Test
     void shouldDeleteCard() {
-        Card inactiveCard = card.toBuilder().status("INACTIVE").build();
+        Card inactiveCard = card.toBuilder().status(CardStatusEnum.INACTIVE).build();
         when(deleteCardUseCase.delete("a3f7b2c1e9d04f58")).thenReturn(Mono.just(inactiveCard));
 
         MockServerRequest serverRequest = MockServerRequest.builder()
@@ -186,6 +195,64 @@ class HandlerTest {
 
         StepVerifier.create(handler.deleteCard(serverRequest))
                 .assertNext(res -> assertEquals(404, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldCreateTransaction() {
+        Transaction transaction = Transaction.builder()
+                .cardId(1L)
+                .reference("123456")
+                .totalAmount(new BigDecimal("50000.00"))
+                .address("Calle 123")
+                .status(TransactionStatusEnum.APPROVED)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        CreateTransactionRequest request = new CreateTransactionRequest(
+                "a3f7b2c1e9d04f58", "123456", new BigDecimal("50000.00"), "Calle 123");
+
+        when(createTransactionUseCase.create(any())).thenReturn(Mono.just(transaction));
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.createTransaction(serverRequest))
+                .assertNext(res -> assertEquals(201, res.statusCode().value()))
+                .verifyComplete();
+
+        verify(createTransactionUseCase).create(any());
+    }
+
+    @Test
+    void shouldReturn404WhenCardNotFoundOnCreateTransaction() {
+        CreateTransactionRequest request = new CreateTransactionRequest(
+                "nonexistent12345", "123456", new BigDecimal("50000.00"), "Calle 123");
+
+        when(createTransactionUseCase.create(any()))
+                .thenReturn(Mono.error(new BusinessException("Tarjeta no existe", "01", 404)));
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.createTransaction(serverRequest))
+                .assertNext(res -> assertEquals(404, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturn400WhenCardNotEnrolledOnCreateTransaction() {
+        CreateTransactionRequest request = new CreateTransactionRequest(
+                "a3f7b2c1e9d04f58", "123456", new BigDecimal("50000.00"), "Calle 123");
+
+        when(createTransactionUseCase.create(any()))
+                .thenReturn(Mono.error(new BusinessException("Tarjeta no enrolada", "02", 400)));
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .body(Mono.just(request));
+
+        StepVerifier.create(handler.createTransaction(serverRequest))
+                .assertNext(res -> assertEquals(400, res.statusCode().value()))
                 .verifyComplete();
     }
 }

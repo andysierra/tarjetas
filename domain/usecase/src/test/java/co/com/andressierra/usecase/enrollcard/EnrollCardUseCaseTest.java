@@ -44,7 +44,7 @@ class EnrollCardUseCaseTest {
                 .phoneNumber("3001234567")
                 .validationNumber(42)
                 .identifier("a3f7b2c1e9d04f58")
-                .status(CardStatusEnum.CREATED.name())
+                .status(CardStatusEnum.CREATED)
                 .createdAt(LocalDateTime.now())
                 .build();
     }
@@ -63,7 +63,7 @@ class EnrollCardUseCaseTest {
         when(cardRepository.save(any(Card.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
         StepVerifier.create(enrollCardUseCase.enroll(buildCommand(42)))
-                .assertNext(result -> assertEquals(CardStatusEnum.ENROLLED.name(), result.getStatus()))
+                .assertNext(result -> assertEquals(CardStatusEnum.ENROLLED.name(), result.getStatus().name()))
                 .verifyComplete();
     }
 
@@ -79,7 +79,7 @@ class EnrollCardUseCaseTest {
 
         ArgumentCaptor<Card> captor = ArgumentCaptor.forClass(Card.class);
         verify(cardRepository).save(captor.capture());
-        assertEquals(CardStatusEnum.ENROLLED.name(), captor.getValue().getStatus());
+        assertEquals(CardStatusEnum.ENROLLED.name(), captor.getValue().getStatus().name());
     }
 
     @Test

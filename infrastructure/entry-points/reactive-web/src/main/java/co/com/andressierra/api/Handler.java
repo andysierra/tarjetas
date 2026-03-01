@@ -3,9 +3,11 @@ package co.com.andressierra.api;
 import co.com.andressierra.api.mapper.Mapper;
 import co.com.andressierra.api.rest.ResponseBuilder;
 import co.com.andressierra.api.rest.request.CreateCardRequest;
+import co.com.andressierra.api.rest.request.CreateTransactionRequest;
 import co.com.andressierra.api.rest.request.EnrollCardRequest;
 import co.com.andressierra.model.messages.MessagesEnum;
 import co.com.andressierra.usecase.createcard.CreateCardUseCase;
+import co.com.andressierra.usecase.createtransaction.CreateTransactionUseCase;
 import co.com.andressierra.usecase.deletecard.DeleteCardUseCase;
 import co.com.andressierra.usecase.enrollcard.EnrollCardUseCase;
 import co.com.andressierra.usecase.getcard.GetCardUseCase;
@@ -26,6 +28,7 @@ public class Handler {
     private final EnrollCardUseCase enrollCardUseCase;
     private final GetCardUseCase getCardUseCase;
     private final DeleteCardUseCase deleteCardUseCase;
+    private final CreateTransactionUseCase createTransactionUseCase;
 
     public Mono<ServerResponse> createCard(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CreateCardRequest.class)
@@ -57,7 +60,10 @@ public class Handler {
     }
 
     public Mono<ServerResponse> createTransaction(ServerRequest serverRequest) {
-        return ServerResponse.ok().build();
+        return serverRequest.bodyToMono(CreateTransactionRequest.class)
+                .flatMap(request -> createTransactionUseCase.create(Mapper.toCommand(request)))
+                .flatMap(tx -> ResponseBuilder.success(Mapper.toCreateTransactionResponse(tx), MessagesEnum.TRANSACTION_CREATED))
+                .onErrorResume(ResponseBuilder::handleError);
     }
 
     public Mono<ServerResponse> getTransaction(ServerRequest serverRequest) {

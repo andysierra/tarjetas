@@ -20,7 +20,7 @@ public class EnrollCardUseCase {
                     if (!card.getValidationNumber().equals(command.getValidationNumber())) {
                         return Mono.error(buildException(MessagesEnum.INVALID_VALIDATION_NUMBER));
                     }
-                    card.setStatus(CardStatusEnum.ENROLLED.name());
+                    card.setStatus(CardStatusEnum.ENROLLED);
                     return cardRepository.save(card);
                 });
     }

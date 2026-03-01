@@ -25,7 +25,7 @@ public class CreateCardUseCase {
                 .phoneNumber(command.getPhoneNumber())
                 .validationNumber(generateValidationNumber())
                 .identifier(Card.generateIdentifier(command.getPan(), now))
-                .status(CardStatusEnum.CREATED.name())
+                .status(CardStatusEnum.CREATED)
                 .createdAt(now)
                 .build();
 

@@ -17,7 +17,7 @@ public class DeleteCardUseCase {
         return cardRepository.findByIdentifier(identifier)
                 .switchIfEmpty(Mono.error(buildException(MessagesEnum.CARD_NOT_FOUND)))
                 .flatMap(card -> {
-                    card.setStatus(CardStatusEnum.INACTIVE.name());
+                    card.setStatus(CardStatusEnum.INACTIVE);
                     return cardRepository.save(card);
                 });
     }

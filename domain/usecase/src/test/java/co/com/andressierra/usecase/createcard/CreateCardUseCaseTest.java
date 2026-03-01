@@ -62,7 +62,7 @@ class CreateCardUseCaseTest {
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         StepVerifier.create(createCardUseCase.create(buildCommand()))
-                .assertNext(card -> assertEquals("CREATED", card.getStatus()))
+                .assertNext(card -> assertEquals("CREATED", card.getStatus().name()))
                 .verifyComplete();
     }
 
