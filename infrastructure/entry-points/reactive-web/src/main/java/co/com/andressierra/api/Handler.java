@@ -11,6 +11,7 @@ import co.com.andressierra.usecase.createtransaction.CreateTransactionUseCase;
 import co.com.andressierra.usecase.deletecard.DeleteCardUseCase;
 import co.com.andressierra.usecase.enrollcard.EnrollCardUseCase;
 import co.com.andressierra.usecase.getcard.GetCardUseCase;
+import co.com.andressierra.usecase.gettransaction.GetTransactionUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -29,6 +30,7 @@ public class Handler {
     private final GetCardUseCase getCardUseCase;
     private final DeleteCardUseCase deleteCardUseCase;
     private final CreateTransactionUseCase createTransactionUseCase;
+    private final GetTransactionUseCase getTransactionUseCase;
 
     public Mono<ServerResponse> createCard(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CreateCardRequest.class)
@@ -67,7 +69,10 @@ public class Handler {
     }
 
     public Mono<ServerResponse> getTransaction(ServerRequest serverRequest) {
-        return ServerResponse.ok().build();
+        String reference = serverRequest.pathVariable(REFERENCE_PATH_VARIABLE);
+        return getTransactionUseCase.getByReference(reference)
+                .flatMap(tx -> ResponseBuilder.success(Mapper.toGetTransactionResponse(tx), MessagesEnum.TRANSACTION_FOUND))
+                .onErrorResume(ResponseBuilder::handleError);
     }
 
     public Mono<ServerResponse> cancelTransaction(ServerRequest serverRequest) {

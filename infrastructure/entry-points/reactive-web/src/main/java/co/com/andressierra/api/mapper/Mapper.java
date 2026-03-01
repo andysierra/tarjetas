@@ -8,6 +8,7 @@ import co.com.andressierra.api.rest.response.CreateTransactionResponse;
 import co.com.andressierra.api.rest.response.DeleteCardResponse;
 import co.com.andressierra.api.rest.response.EnrollCardResponse;
 import co.com.andressierra.api.rest.response.GetCardResponse;
+import co.com.andressierra.api.rest.response.GetTransactionResponse;
 import co.com.andressierra.model.card.Card;
 import co.com.andressierra.model.transaction.Transaction;
 import co.com.andressierra.usecase.createcard.CreateCommand;
@@ -78,6 +79,15 @@ public class Mapper {
         return CreateTransactionResponse.builder()
                 .status(transaction.getStatus())
                 .reference(transaction.getReference())
+                .build();
+    }
+
+    public static GetTransactionResponse toGetTransactionResponse(Transaction transaction) {
+        return GetTransactionResponse.builder()
+                .reference(transaction.getReference())
+                .totalAmount(transaction.getTotalAmount())
+                .address(transaction.getAddress())
+                .status(transaction.getStatus())
                 .build();
     }
 }

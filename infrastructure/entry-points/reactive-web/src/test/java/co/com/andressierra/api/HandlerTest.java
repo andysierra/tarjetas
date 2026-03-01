@@ -14,6 +14,7 @@ import co.com.andressierra.usecase.createtransaction.CreateTransactionUseCase;
 import co.com.andressierra.usecase.deletecard.DeleteCardUseCase;
 import co.com.andressierra.usecase.enrollcard.EnrollCardUseCase;
 import co.com.andressierra.usecase.getcard.GetCardUseCase;
+import co.com.andressierra.usecase.gettransaction.GetTransactionUseCase;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,6 +48,9 @@ class HandlerTest {
 
     @Mock
     private CreateTransactionUseCase createTransactionUseCase;
+
+    @Mock
+    private GetTransactionUseCase getTransactionUseCase;
 
     @InjectMocks
     private Handler handler;
@@ -112,7 +116,7 @@ class HandlerTest {
         EnrollCardRequest request = new EnrollCardRequest(42);
 
         when(enrollCardUseCase.enroll(any()))
-                .thenReturn(Mono.error(new BusinessException("Tarjeta no existe", "01", 404)));
+                .thenReturn(Mono.error(new BusinessException("Tarjeta no existe", "41", 404)));
 
         MockServerRequest serverRequest = MockServerRequest.builder()
                 .pathVariable("identifier", "nonexistent12345")
@@ -128,7 +132,7 @@ class HandlerTest {
         EnrollCardRequest request = new EnrollCardRequest(99);
 
         when(enrollCardUseCase.enroll(any()))
-                .thenReturn(Mono.error(new BusinessException("Numero de validacion invalido", "02", 400)));
+                .thenReturn(Mono.error(new BusinessException("Numero de validacion invalido", "45", 400)));
 
         MockServerRequest serverRequest = MockServerRequest.builder()
                 .pathVariable("identifier", "a3f7b2c1e9d04f58")
@@ -157,7 +161,7 @@ class HandlerTest {
     @Test
     void shouldReturn404WhenCardNotFoundOnGet() {
         when(getCardUseCase.getByIdentifier("nonexistent12345"))
-                .thenReturn(Mono.error(new BusinessException("Tarjeta no existe", "01", 404)));
+                .thenReturn(Mono.error(new BusinessException("Tarjeta no existe", "41", 404)));
 
         MockServerRequest serverRequest = MockServerRequest.builder()
                 .pathVariable("identifier", "nonexistent12345")
@@ -187,7 +191,7 @@ class HandlerTest {
     @Test
     void shouldReturn404WhenCardNotFoundOnDelete() {
         when(deleteCardUseCase.delete("nonexistent12345"))
-                .thenReturn(Mono.error(new BusinessException("Tarjeta no existe", "01", 404)));
+                .thenReturn(Mono.error(new BusinessException("Tarjeta no existe", "41", 404)));
 
         MockServerRequest serverRequest = MockServerRequest.builder()
                 .pathVariable("identifier", "nonexistent12345")
@@ -230,7 +234,7 @@ class HandlerTest {
                 "nonexistent12345", "123456", new BigDecimal("50000.00"), "Calle 123");
 
         when(createTransactionUseCase.create(any()))
-                .thenReturn(Mono.error(new BusinessException("Tarjeta no existe", "01", 404)));
+                .thenReturn(Mono.error(new BusinessException("Tarjeta no existe", "41", 404)));
 
         MockServerRequest serverRequest = MockServerRequest.builder()
                 .body(Mono.just(request));
@@ -246,12 +250,50 @@ class HandlerTest {
                 "a3f7b2c1e9d04f58", "123456", new BigDecimal("50000.00"), "Calle 123");
 
         when(createTransactionUseCase.create(any()))
-                .thenReturn(Mono.error(new BusinessException("Tarjeta no enrolada", "02", 400)));
+                .thenReturn(Mono.error(new BusinessException("Tarjeta no enrolada", "42", 400)));
 
         MockServerRequest serverRequest = MockServerRequest.builder()
                 .body(Mono.just(request));
 
         StepVerifier.create(handler.createTransaction(serverRequest))
+                .assertNext(res -> assertEquals(400, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldGetTransaction() {
+        Transaction transaction = Transaction.builder()
+                .cardId(1L)
+                .reference("123456")
+                .totalAmount(new BigDecimal("50000.00"))
+                .address("Calle 123")
+                .status(TransactionStatusEnum.APPROVED)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        when(getTransactionUseCase.getByReference("123456")).thenReturn(Mono.just(transaction));
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .pathVariable("reference", "123456")
+                .build();
+
+        StepVerifier.create(handler.getTransaction(serverRequest))
+                .assertNext(res -> assertEquals(200, res.statusCode().value()))
+                .verifyComplete();
+
+        verify(getTransactionUseCase).getByReference("123456");
+    }
+
+    @Test
+    void shouldReturn400WhenTransactionNotFound() {
+        when(getTransactionUseCase.getByReference("999999"))
+                .thenReturn(Mono.error(new BusinessException("Numero de referencia invalido", "43", 400)));
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .pathVariable("reference", "999999")
+                .build();
+
+        StepVerifier.create(handler.getTransaction(serverRequest))
                 .assertNext(res -> assertEquals(400, res.statusCode().value()))
                 .verifyComplete();
     }

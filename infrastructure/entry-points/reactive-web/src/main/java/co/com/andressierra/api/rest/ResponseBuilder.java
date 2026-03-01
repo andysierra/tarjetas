@@ -40,7 +40,7 @@ public class ResponseBuilder {
     public static Mono<ServerResponse> handleError(Throwable err) {
         var knownError = "ERROR [%s]: %s";
         if(err instanceof CustomException cEx) {
-            var knownMessage = MessagesEnum.findByClientCode(cEx.getClientCode());
+            var knownMessage = MessagesEnum.findByOpCode(cEx.getOpcode());
             log.error(String.format(knownError, cEx.getClientCode(), knownMessage.getMessage()), err);
             return ResponseBuilder.error(knownMessage);
         }

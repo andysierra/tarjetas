@@ -8,6 +8,7 @@ import co.com.andressierra.usecase.createtransaction.CreateTransactionUseCase;
 import co.com.andressierra.usecase.deletecard.DeleteCardUseCase;
 import co.com.andressierra.usecase.enrollcard.EnrollCardUseCase;
 import co.com.andressierra.usecase.getcard.GetCardUseCase;
+import co.com.andressierra.usecase.gettransaction.GetTransactionUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
@@ -49,6 +50,9 @@ class RouterRestTest {
     @MockitoBean
     private CreateTransactionUseCase createTransactionUseCase;
 
+    @MockitoBean
+    private GetTransactionUseCase getTransactionUseCase;
+
     @Test
     void createCard_shouldReturn201() {
         Card card = Card.builder()
@@ -82,7 +86,7 @@ class RouterRestTest {
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody()
-                .jsonPath("$.code").isEqualTo("00")
+                .jsonPath("$.code").isEqualTo("21")
                 .jsonPath("$.data.maskedPan").isEqualTo("456789******6789")
                 .jsonPath("$.data.validationNumber").isEqualTo(42)
                 .jsonPath("$.data.identifier").isNotEmpty();

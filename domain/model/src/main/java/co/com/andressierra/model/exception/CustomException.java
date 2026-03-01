@@ -12,12 +12,15 @@ public abstract class CustomException extends RuntimeException{
 
     private final int clientCode;
 
+    private final String opcode;
+
     private final Throwable cause;
 
     protected CustomException(String message, String code, int clientCode, Throwable throwable, String... details) {
         super(message, throwable);
         errors.add(new Error(code, message, LocalDateTime.now(), List.of(details)));
         this.clientCode = clientCode;
+        this.opcode = code;
         this.cause = throwable;
     }
 
