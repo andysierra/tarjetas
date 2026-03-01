@@ -1,47 +1,237 @@
-# Proyecto Base Implementando Clean Architecture
+# 💳 Administracion de Tarjetas y Transacciones
 
-## Antes de Iniciar
+API Restful para administracion de tarjetas de credito y transacciones de compra, desarrollado con Spring Boot WebFlux y arquitectura hexagonal (Clean Architecture).
 
-Empezaremos por explicar los diferentes componentes del proyectos y partiremos de los componentes externos, continuando con los componentes core de negocio (dominio) y por último el inicio y configuración de la aplicación.
 
-Lee el artículo [Clean Architecture — Aislando los detalles](https://medium.com/bancolombia-tech/clean-architecture-aislando-los-detalles-4f9530f35d7a)
+## 🛠️ Stack Tecnologico
 
-# Arquitectura
+- **Java 21**
+- **Spring Boot 4.0.2** (WebFlux - Reactivo)
+- **R2DBC** con PostgreSQL 16
+- **Gradle 9.3.0**
+- **Scaffold** Clean Architecture Plugin v4.1.0
+- **Jakarta Bean Validation** para validacion de inputs
+- **JUnit 5 + Mockito + StepVerifier** para pruebas unitarias
 
-![Clean Architecture](https://miro.medium.com/max/1400/1*ZdlHz8B0-qu9Y-QO3AXR_w.png)
+## 🏗️ Arquitectura Hexagonal (Puertos y Adaptadores)
+![img.png](img.png)
 
-## Domain
+```
+                    ┌──────────────────────────────────────┐
+                    │           APPLICATION                │
+                    │  (Ensamblaje, configuracion, beans)  │
+                    └──────────────┬───────────────────────┘
+                                   │
+          ┌────────────────────────┼────────────────────────┐
+          │                        │                        │
+ ┌────────▼─────────┐   ┌─────────▼──────────┐   ┌────────▼─────────┐
+ │   ENTRY POINTS    │   │      DOMAIN        │   │ DRIVEN ADAPTERS  │
+ │  (reactive-web)   │   │                    │   │ (r2dbc-postgres) │
+ │                   │   │  ┌──────────────┐  │   │                  │
+ │  Handler          │──▶│  │  Use Cases   │  │◀──│ CardRepository   │
+ │  RouterRest       │   │  │              │  │   │   Adapter        │
+ │  ResponseBuilder  │   │  └──────┬───────┘  │   │                  │
+ │  RestValidator    │   │         │          │   │ TransactionRepo  │
+ │  Mapper           │   │  ┌──────▼───────┐  │   │   Adapter        │
+ │                   │   │  │   Models     │  │   │                  │
+ │  Requests/        │   │  │   Gateways   │  │   │ CardEntity       │
+ │  Responses        │   │  │   Enums      │  │   │ TransactionEntity│
+ └───────────────────┘   │  └──────────────┘  │   └──────────────────┘
+                         └────────────────────┘
+```
 
-Es el módulo más interno de la arquitectura, pertenece a la capa del dominio y encapsula la lógica y reglas del negocio mediante modelos y entidades del dominio.
+### 📦 Capas
 
-## Usecases
+**Domain (Model):** Modelos de negocio (`Card`, `Transaction`), enums de estado (`CardStatusEnum`, `TransactionStatusEnum`), interfaces de repositorio (Gateways/Ports), excepciones personalizadas (`BusinessException`) y mensajes (`MessagesEnum`).
 
-Este módulo gradle perteneciente a la capa del dominio, implementa los casos de uso del sistema, define lógica de aplicación y reacciona a las invocaciones desde el módulo de entry points, orquestando los flujos hacia el módulo de entities.
+**Domain (Use Cases):** Logica de negocio pura sin dependencias de infraestructura. Cada operacion es un caso de uso independiente:
+- `CreateCardUseCase` - Genera numero de validacion (SecureRandom) e identificador (SHA-256)
+- `EnrollCardUseCase` - Valida numero de validacion y cambia estado a ENROLLED
+- `GetCardUseCase` - Consulta tarjeta por identificador
+- `DeleteCardUseCase` - Borrado logico, cambia estado a INACTIVE
+- `CreateTransactionUseCase` - Valida que la tarjeta exista y este enrolada
+- `CancelTransactionUseCase` - Valida ventana de 5 minutos para anulacion
+- `GetTransactionUseCase` - Consulta transaccion por referencia
 
-## Infrastructure
+**Entry Points (reactive-web):** Capa de presentacion con routing funcional de WebFlux. `Handler` orquesta las peticiones, `RestValidator` valida los DTOs con Jakarta Validation, `Mapper` convierte entre request/response y comandos/modelos.
 
-### Helpers
+**Driven Adapters (r2dbc-postgresql):** Implementacion de los ports/gateways del dominio. `CardRepositoryAdapter` y `TransactionRepositoryAdapter` traducen errores de infraestructura (`DataIntegrityViolationException`) a excepciones de negocio (`BusinessException`).
 
-En el apartado de helpers tendremos utilidades generales para los Driven Adapters y Entry Points.
+## ✅ Cumplimiento de Requisitos
 
-Estas utilidades no están arraigadas a objetos concretos, se realiza el uso de generics para modelar comportamientos
-genéricos de los diferentes objetos de persistencia que puedan existir, este tipo de implementaciones se realizan
-basadas en el patrón de diseño [Unit of Work y Repository](https://medium.com/@krzychukosobudzki/repository-design-pattern-bc490b256006)
+| # | Requisito | Estado | Detalle |
+|---|-----------|--------|---------|
+| 1 | Crear tarjeta | ✅ | PAN, titular, cedula, tipo, telefono. Retorna validation number, PAN enmascarado, identificador |
+| 2 | Enrolar tarjeta | ✅ | Valida numero de validacion, cambia estado a ENROLLED |
+| 3 | Consultar tarjeta | ✅ | Retorna PAN enmascarado, titular, cedula, telefono, estado |
+| 4 | Eliminar tarjeta | ✅ | Borrado logico, estado INACTIVE |
+| 5 | Crear transaccion | ✅ | Valida tarjeta existente y enrolada |
+| 6 | Anular transaccion | ✅ | Valida ventana de 5 minutos |
+| 7 | Pruebas unitarias >= 80% | ✅ | Tests en use cases, handler, adapters con Mockito + StepVerifier |
+| 8 | Auditoria en BD | ✅ | Campos `created_at` en ambas tablas, estados inmutables (CREATED->ENROLLED->INACTIVE) |
+| 9 | Spring Boot | ✅ | Spring Boot 4.0.2 con WebFlux reactivo |
+| 10 | Jakarta Validation | ✅ | `@NotBlank`, `@Pattern`, `@Size`, `@NotNull`, `@Positive` en todos los DTOs |
+| 11 | Actuadores / Health | ✅ | `/actuator/health` habilitado con probes |
+| 12 | Metodos HTTP correctos | ✅ | POST (crear), GET (consultar), PUT (enrolar/anular), DELETE (eliminar) |
+| 13 | Codigos HTTP correctos | ✅ | 200, 201, 400, 404, 409, 500 |
+| 14 | Excepciones personalizadas | ✅ | `BusinessException`, `CustomException` con codigos de operacion unicos |
 
-Estas clases no puede existir solas y debe heredarse su compartimiento en los **Driven Adapters**
+## 🗄️ DDL - Scripts SQL
 
-### Driven Adapters
+```sql
+CREATE TABLE card (
+    id                BIGSERIAL PRIMARY KEY,
+    pan               VARCHAR(19)  NOT NULL,
+    cardholder_name   VARCHAR(150) NOT NULL,
+    cardholder_id     VARCHAR(15)  NOT NULL,
+    card_type         VARCHAR(10)  NOT NULL,
+    phone_number      VARCHAR(10)  NOT NULL,
+    validation_number INTEGER      NOT NULL,
+    identifier        VARCHAR(64)  NOT NULL UNIQUE,
+    status            VARCHAR(20)  NOT NULL DEFAULT 'CREATED',
+    created_at        TIMESTAMP    NOT NULL DEFAULT NOW()
+);
 
-Los driven adapter representan implementaciones externas a nuestro sistema, como lo son conexiones a servicios rest,
-soap, bases de datos, lectura de archivos planos, y en concreto cualquier origen y fuente de datos con la que debamos
-interactuar.
+CREATE TABLE transactions (
+    id                BIGSERIAL PRIMARY KEY,
+    card_id           BIGINT         NOT NULL REFERENCES card(id),
+    reference         VARCHAR(6)     NOT NULL UNIQUE,
+    validation_number INTEGER        NOT NULL,
+    total_amount      DECIMAL(15, 2) NOT NULL,
+    address           VARCHAR(200),
+    status            VARCHAR(20)    NOT NULL DEFAULT 'APPROVED',
+    created_at        TIMESTAMP      NOT NULL DEFAULT NOW()
+);
+```
 
-### Entry Points
+## 🔐 Variables de Entorno
 
-Los entry points representan los puntos de entrada de la aplicación o el inicio de los flujos de negocio.
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=tarjetas_db
+DB_SCHEMA=public
+DB_USER=postgres
+DB_PASSWORD=postgres
+```
 
-## Application
+## 🚀 Ejecucion
 
-Este módulo es el más externo de la arquitectura, es el encargado de ensamblar los distintos módulos, resolver las dependencias y crear los beans de los casos de use (UseCases) de forma automática, inyectando en éstos instancias concretas de las dependencias declaradas. Además inicia la aplicación (es el único módulo del proyecto donde encontraremos la función “public static void main(String[] args)”.
+```bash
+# Levantar PostgreSQL con Docker
+docker compose up -d
 
-**Los beans de los casos de uso se disponibilizan automaticamente gracias a un '@ComponentScan' ubicado en esta capa.**
+# Ejecutar la aplicacion
+./gradlew bootRun
+
+# O con variables de entorno inline
+DB_HOST=localhost DB_PORT=5432 DB_NAME=tarjetas_db DB_SCHEMA=public DB_USER=postgres DB_PASSWORD=postgres ./gradlew bootRun
+```
+
+## 📡 API Endpoints y cURLs
+
+### 1. 🆕 Crear Tarjeta
+`POST /api/v1/cards`
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/cards" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pan": "4567890123456792",
+    "cardholderName": "Natalia Monroy Rendon",
+    "cardholderId": "1234567890",
+    "cardType": "CREDIT",
+    "phoneNumber": "3001234567"
+  }' | jq
+```
+
+### 2. 🔓 Enrolar Tarjeta
+`PUT /api/v1/cards/{identifier}/enroll`
+
+```bash
+curl -X PUT "http://localhost:8080/api/v1/cards/85bfacea748f05e0/enroll" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "validationNumber": 74
+  }' | jq
+```
+
+### 3. 🔍 Consultar Tarjeta
+`GET /api/v1/cards/{identifier}`
+
+```bash
+curl http://localhost:8080/api/v1/cards/85bfacea748f05e0 | jq
+```
+
+### 4. 🗑️ Eliminar Tarjeta
+`DELETE /api/v1/cards/{identifier}`
+
+```bash
+curl -X DELETE http://localhost:8080/api/v1/cards/9e91a8d21f0af584 | jq
+```
+
+### 5. 💰 Crear Transaccion
+`POST /api/v1/transactions`
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/transactions" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "identifier": "85bfacea748f05e0",
+    "reference": "000002",
+    "totalAmount": 1993.00,
+    "address": "Calle camilo"
+  }' | jq
+```
+
+### 6. 🔎 Consultar Transaccion
+`GET /api/v1/transactions/{reference}`
+
+```bash
+curl http://localhost:8080/api/v1/transactions/000001 | jq
+```
+
+### 7. ❌ Anular Transaccion
+`PUT /api/v1/transactions/{reference}/cancel`
+
+```bash
+curl -X PUT http://localhost:8080/api/v1/transactions/000001/cancel | jq
+```
+
+### 8. 💚 Health Check (Actuador)
+`GET /actuator/health`
+
+```bash
+curl http://localhost:8080/actuator/health | jq
+```
+
+## 📋 Codigos de Operacion
+
+| Codigo | Significado |
+|--------|-------------|
+| 21 | Tarjeta creada |
+| 22 | Tarjeta enrolada |
+| 23 | Tarjeta consultada |
+| 24 | Tarjeta eliminada |
+| 25 | Transaccion creada |
+| 26 | Transaccion anulada |
+| 27 | Transaccion consultada |
+| 40 | Datos de entrada invalidos |
+| 41 | Tarjeta no existe |
+| 42 | Tarjeta no enrolada |
+| 43 | Referencia invalida |
+| 44 | No se puede anular transaccion (>5 min) |
+| 45 | Numero de validacion invalido |
+| 46 | Tarjeta ya existe |
+| 47 | Referencia ya existe |
+| 48 | Error de persistencia |
+| 51 | Error generando identificador |
+| 52 | Error desconocido |
+
+## 🧪 Ejecutar Tests
+
+```bash
+./gradlew test
+```
+
+Made with ❤️ by Andrés Sierra
