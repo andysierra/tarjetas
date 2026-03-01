@@ -1,0 +1,188 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f0f2f5;
+  color: #333;
+}
+
+header {
+  background: #1a237e;
+  color: white;
+  padding: 1rem 2rem;
+  text-align: center;
+}
+
+header h1 { font-size: 1.4rem; }
+
+main {
+  max-width: 1100px;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.panel {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  padding: 1.5rem;
+}
+
+.panel h2 {
+  color: #1a237e;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e8eaf6;
+  padding-bottom: 0.5rem;
+}
+
+.form-container {
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-container h3 {
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  color: #555;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: #666;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.form-group input.ng-invalid.ng-touched {
+  border-color: #e53935;
+}
+
+.error-text {
+  color: #e53935;
+  font-size: 0.75rem;
+  margin-top: 0.2rem;
+}
+
+.btn {
+  padding: 0.5rem 1.2rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary { background: #1a237e; color: white; }
+.btn-primary:hover:not(:disabled) { background: #283593; }
+
+.btn-enroll { background: #2e7d32; color: white; font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+.btn-enroll:hover { background: #388e3c; }
+
+.btn-delete { background: #c62828; color: white; font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+.btn-delete:hover { background: #d32f2f; }
+
+.btn-cancel-tx { background: #e65100; color: white; font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+.btn-cancel-tx:hover { background: #ef6c00; }
+
+.btn-cancel { background: #757575; color: white; }
+
+.table-container h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+th, td {
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  background: #e8eaf6;
+  font-weight: 600;
+  color: #1a237e;
+}
+
+tr:hover { background: #f5f5f5; }
+
+.empty-msg {
+  text-align: center;
+  color: #999;
+  padding: 1.5rem;
+  font-style: italic;
+}
+
+.status-created { color: #f57f17; font-weight: 600; }
+.status-enrolled { color: #2e7d32; font-weight: 600; }
+.status-inactive { color: #c62828; font-weight: 600; }
+.status-approved { color: #2e7d32; font-weight: 600; }
+.status-cancelled { color: #c62828; font-weight: 600; }
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-content {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  min-width: 350px;
+}
+
+.modal-content h3 { margin-bottom: 1rem; }
+
+.modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 0.3rem;
+}

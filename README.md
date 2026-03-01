@@ -106,6 +106,7 @@ CREATE TABLE transactions (
     created_at        TIMESTAMP      NOT NULL DEFAULT NOW()
 );
 ```
+![img_4.png](img_4.png)
 
 ## 🔐 Variables de Entorno
 
@@ -230,6 +231,70 @@ curl http://localhost:8080/actuator/health | jq
 | 48 | Error de persistencia |
 | 51 | Error generando identificador |
 | 52 | Error desconocido |
+
+## 🖥️ Frontend - Angular
+
+SPA desarrollada con **Angular 21** y enfoque reactivo para interactuar con la API REST.
+
+![img_2.png](img_2.png)
+![img_3.png](img_3.png)
+
+### 🛠️ Stack Frontend
+
+- **Angular 21.2.0** (Standalone Components)
+- **RxJS** con `BehaviorSubject` para manejo de estado reactivo
+- **ReactiveFormsModule** con `Validators` para validacion de inputs
+- **AsyncPipe** (`| async`) en templates para suscripciones automaticas
+- **localStorage** para persistencia de identificadores entre sesiones
+
+### 📦 Estructura
+
+```
+frontend/src/app/
+├── models/
+│   ├── api-response.model.ts    # ApiResponse<T> generico
+│   ├── card.model.ts            # CardResponse, CreateCardRequest, EnrollCardRequest
+│   └── transaction.model.ts     # TransactionResponse, CreateTransactionRequest
+├── services/
+│   ├── card.service.ts          # CRUD tarjetas + BehaviorSubject cards$
+│   ├── transaction.service.ts   # CRUD transacciones + BehaviorSubject transactions$
+│   └── toast.service.ts         # Notificaciones con BehaviorSubject toast$
+├── components/
+│   ├── cards/
+│   │   ├── cards.component.ts   # Formulario + tabla de tarjetas
+│   │   └── cards.component.html # Template con @if/@for (Angular 21)
+│   ├── transactions/
+│   │   ├── transactions.component.ts
+│   │   └── transactions.component.html
+│   └── shared/
+│       └── toast.component.ts   # Toast de notificaciones
+├── app.ts                       # Componente raiz
+├── app.html                     # Layout principal
+└── app.config.ts                # provideHttpClient + provideRouter
+```
+
+### ✅ Cumplimiento de Requisitos Frontend
+
+| # | Requisito | Estado | Detalle |
+|---|-----------|--------|---------|
+| 1 | Visualizar tarjetas (PAN enmascarado) | ✅ | Tabla con PAN enmascarado, titular, cedula, telefono, estado |
+| 2 | Visualizar transacciones | ✅ | Tabla con referencia, monto (formato COP), direccion, estado |
+| 3 | Boton de pago (crear transaccion) | ✅ | Formulario con identificador, referencia, monto y direccion |
+| 4 | Formulario crear tarjetas | ✅ | PAN, titular, cedula, tipo (CREDIT/DEBIT), telefono |
+| 5 | Validaciones de input | ✅ | ReactiveFormsModule con Validators (required, pattern, min, max, minLength, maxLength) |
+| 6 | Enrolar tarjeta | ✅ | Modal con numero de validacion |
+| 7 | Eliminar tarjeta | ✅ | Boton con confirmacion |
+| 8 | Anular transaccion | ✅ | Boton visible solo en transacciones APPROVED |
+
+### 🚀 Ejecucion Frontend
+
+```bash
+cd frontend
+npm install
+npx ng serve
+```
+
+La aplicacion se levanta por defecto en `http://localhost:4200`.
 
 ## 🧪 Ejecutar Tests
 
