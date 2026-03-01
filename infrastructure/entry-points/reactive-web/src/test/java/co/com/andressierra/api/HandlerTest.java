@@ -6,6 +6,7 @@ import co.com.andressierra.model.card.Card;
 import co.com.andressierra.model.card.enums.CardTypeEnum;
 import co.com.andressierra.model.exception.BusinessException;
 import co.com.andressierra.usecase.createcard.CreateCardUseCase;
+import co.com.andressierra.usecase.deletecard.DeleteCardUseCase;
 import co.com.andressierra.usecase.enrollcard.EnrollCardUseCase;
 import co.com.andressierra.usecase.getcard.GetCardUseCase;
 import java.time.LocalDateTime;
@@ -34,6 +35,9 @@ class HandlerTest {
 
     @Mock
     private GetCardUseCase getCardUseCase;
+
+    @Mock
+    private DeleteCardUseCase deleteCardUseCase;
 
     @InjectMocks
     private Handler handler;
@@ -151,6 +155,36 @@ class HandlerTest {
                 .build();
 
         StepVerifier.create(handler.getCard(serverRequest))
+                .assertNext(res -> assertEquals(404, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldDeleteCard() {
+        Card inactiveCard = card.toBuilder().status("INACTIVE").build();
+        when(deleteCardUseCase.delete("a3f7b2c1e9d04f58")).thenReturn(Mono.just(inactiveCard));
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .pathVariable("identifier", "a3f7b2c1e9d04f58")
+                .build();
+
+        StepVerifier.create(handler.deleteCard(serverRequest))
+                .assertNext(res -> assertEquals(200, res.statusCode().value()))
+                .verifyComplete();
+
+        verify(deleteCardUseCase).delete("a3f7b2c1e9d04f58");
+    }
+
+    @Test
+    void shouldReturn404WhenCardNotFoundOnDelete() {
+        when(deleteCardUseCase.delete("nonexistent12345"))
+                .thenReturn(Mono.error(new BusinessException("Tarjeta no existe", "01", 404)));
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .pathVariable("identifier", "nonexistent12345")
+                .build();
+
+        StepVerifier.create(handler.deleteCard(serverRequest))
                 .assertNext(res -> assertEquals(404, res.statusCode().value()))
                 .verifyComplete();
     }

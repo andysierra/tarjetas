@@ -10,6 +10,7 @@ public enum MessagesEnum {
     CARD_CREATED(201, "Exito creando la tarjeta", "00"),
     CARD_ENROLLED(200, "Exito enrolando la tarjeta", "00"),
     CARD_FOUND(200, "Exito consultando la tarjeta", "00"),
+    CARD_DELETED(200, "Se ha eliminado la tarjeta", "00"),
     CARD_NOT_FOUND(404, "Tarjeta no existe", "01"),
     INVALID_VALIDATION_NUMBER(400, "Numero de validacion invalido", "02"),
     CARD_ALREADY_EXISTS(409, "La tarjeta ya existe en el sistema", "01"),

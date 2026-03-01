@@ -3,6 +3,7 @@ package co.com.andressierra.api;
 import co.com.andressierra.model.card.Card;
 import co.com.andressierra.model.card.enums.CardTypeEnum;
 import co.com.andressierra.usecase.createcard.CreateCardUseCase;
+import co.com.andressierra.usecase.deletecard.DeleteCardUseCase;
 import co.com.andressierra.usecase.enrollcard.EnrollCardUseCase;
 import co.com.andressierra.usecase.getcard.GetCardUseCase;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ class RouterRestTest {
 
     @MockitoBean
     private GetCardUseCase getCardUseCase;
+
+    @MockitoBean
+    private DeleteCardUseCase deleteCardUseCase;
 
     @Test
     void createCard_shouldReturn201() {

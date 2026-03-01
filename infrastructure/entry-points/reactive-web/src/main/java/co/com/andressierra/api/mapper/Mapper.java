@@ -3,6 +3,7 @@ package co.com.andressierra.api.mapper;
 import co.com.andressierra.api.rest.request.CreateCardRequest;
 import co.com.andressierra.api.rest.request.EnrollCardRequest;
 import co.com.andressierra.api.rest.response.CreateCardResponse;
+import co.com.andressierra.api.rest.response.DeleteCardResponse;
 import co.com.andressierra.api.rest.response.EnrollCardResponse;
 import co.com.andressierra.api.rest.response.GetCardResponse;
 import co.com.andressierra.model.card.Card;
@@ -40,6 +41,13 @@ public class Mapper {
     public static EnrollCardResponse toEnrollResponse(Card card) {
         return EnrollCardResponse.builder()
                 .maskedPan(card.getMaskedPan())
+                .build();
+    }
+
+    public static DeleteCardResponse toDeleteCardResponse(Card card) {
+        return DeleteCardResponse.builder()
+                .identifier(card.getIdentifier())
+                .status(card.getStatus())
                 .build();
     }
 
