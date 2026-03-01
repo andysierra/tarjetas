@@ -76,6 +76,9 @@ API Restful para administracion de tarjetas de credito y transacciones de compra
 | 13 | Codigos HTTP correctos | ✅ | 200, 201, 400, 404, 409, 500 |
 | 14 | Excepciones personalizadas | ✅ | `BusinessException`, `CustomException` con codigos de operacion unicos |
 
+## ✅ Calidad de código
+![img_1.png](img_1.png)
+
 ## 🗄️ DDL - Scripts SQL
 
 ```sql
