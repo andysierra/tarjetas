@@ -4,6 +4,7 @@ import co.com.andressierra.api.rest.request.CreateCardRequest;
 import co.com.andressierra.api.rest.request.EnrollCardRequest;
 import co.com.andressierra.api.rest.response.CreateCardResponse;
 import co.com.andressierra.api.rest.response.EnrollCardResponse;
+import co.com.andressierra.api.rest.response.GetCardResponse;
 import co.com.andressierra.model.card.Card;
 import co.com.andressierra.usecase.createcard.CreateCommand;
 import co.com.andressierra.usecase.enrollcard.EnrollCommand;
@@ -39,6 +40,16 @@ public class Mapper {
     public static EnrollCardResponse toEnrollResponse(Card card) {
         return EnrollCardResponse.builder()
                 .maskedPan(card.getMaskedPan())
+                .build();
+    }
+
+    public static GetCardResponse toGetCardResponse(Card card) {
+        return GetCardResponse.builder()
+                .maskedPan(card.getMaskedPan())
+                .cardholderName(card.getCardholderName())
+                .cardholderId(card.getCardholderId())
+                .phoneNumber(card.getPhoneNumber())
+                .status(card.getStatus())
                 .build();
     }
 }

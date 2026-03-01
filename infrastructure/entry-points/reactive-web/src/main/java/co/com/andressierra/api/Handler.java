@@ -7,6 +7,7 @@ import co.com.andressierra.api.rest.request.EnrollCardRequest;
 import co.com.andressierra.model.messages.MessagesEnum;
 import co.com.andressierra.usecase.createcard.CreateCardUseCase;
 import co.com.andressierra.usecase.enrollcard.EnrollCardUseCase;
+import co.com.andressierra.usecase.getcard.GetCardUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -19,6 +20,7 @@ public class Handler {
 
     private final CreateCardUseCase createCardUseCase;
     private final EnrollCardUseCase enrollCardUseCase;
+    private final GetCardUseCase getCardUseCase;
 
     public Mono<ServerResponse> createCard(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CreateCardRequest.class)
@@ -36,7 +38,10 @@ public class Handler {
     }
 
     public Mono<ServerResponse> getCard(ServerRequest serverRequest) {
-        return ServerResponse.ok().build();
+        String identifier = serverRequest.pathVariable("identifier");
+        return getCardUseCase.getByIdentifier(identifier)
+                .flatMap(card -> ResponseBuilder.success(Mapper.toGetCardResponse(card), MessagesEnum.CARD_FOUND))
+                .onErrorResume(ResponseBuilder::handleError);
     }
 
     public Mono<ServerResponse> deleteCard(ServerRequest serverRequest) {

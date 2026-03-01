@@ -4,6 +4,7 @@ import co.com.andressierra.model.card.Card;
 import co.com.andressierra.model.card.enums.CardTypeEnum;
 import co.com.andressierra.usecase.createcard.CreateCardUseCase;
 import co.com.andressierra.usecase.enrollcard.EnrollCardUseCase;
+import co.com.andressierra.usecase.getcard.GetCardUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
@@ -35,6 +36,9 @@ class RouterRestTest {
 
     @MockitoBean
     private EnrollCardUseCase enrollCardUseCase;
+
+    @MockitoBean
+    private GetCardUseCase getCardUseCase;
 
     @Test
     void createCard_shouldReturn201() {
