@@ -19,21 +19,13 @@ public class CancelTransactionUseCase {
 
     public Mono<Transaction> cancel(String reference) {
         return transactionRepository.findByReference(reference)
-                .switchIfEmpty(Mono.error(buildException(MessagesEnum.INVALID_REFERENCE)))
+                .switchIfEmpty(Mono.error(BusinessException.fromMessage(MessagesEnum.INVALID_REFERENCE)))
                 .flatMap(transaction -> {
                     if (transaction.getCreatedAt().plusMinutes(CANCEL_WINDOW_MINUTES).isBefore(LocalDateTime.now())) {
-                        return Mono.error(buildException(MessagesEnum.TRANSACTION_CANNOT_CANCEL));
+                        return Mono.error(BusinessException.fromMessage(MessagesEnum.TRANSACTION_CANNOT_CANCEL));
                     }
                     transaction.setStatus(TransactionStatusEnum.CANCELLED);
                     return transactionRepository.save(transaction);
                 });
-    }
-
-    private BusinessException buildException(MessagesEnum messagesEnum) {
-        return new BusinessException(
-                messagesEnum.getMessage(),
-                messagesEnum.getOperationCode(),
-                messagesEnum.getCode()
-        );
     }
 }

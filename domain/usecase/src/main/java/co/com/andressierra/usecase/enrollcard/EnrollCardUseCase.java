@@ -15,21 +15,13 @@ public class EnrollCardUseCase {
 
     public Mono<Card> enroll(EnrollCommand command) {
         return cardRepository.findByIdentifier(command.getIdentifier())
-                .switchIfEmpty(Mono.error(buildException(MessagesEnum.CARD_NOT_FOUND)))
+                .switchIfEmpty(Mono.error(BusinessException.fromMessage(MessagesEnum.CARD_NOT_FOUND)))
                 .flatMap(card -> {
                     if (!card.getValidationNumber().equals(command.getValidationNumber())) {
-                        return Mono.error(buildException(MessagesEnum.INVALID_VALIDATION_NUMBER));
+                        return Mono.error(BusinessException.fromMessage(MessagesEnum.INVALID_VALIDATION_NUMBER));
                     }
                     card.setStatus(CardStatusEnum.ENROLLED);
                     return cardRepository.save(card);
                 });
-    }
-
-    private BusinessException buildException(MessagesEnum messagesEnum) {
-        return new BusinessException(
-                messagesEnum.getMessage(),
-                messagesEnum.getOperationCode(),
-                messagesEnum.getCode()
-        );
     }
 }

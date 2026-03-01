@@ -20,10 +20,10 @@ public class CreateTransactionUseCase {
 
     public Mono<Transaction> create(CreateTransactionCommand command) {
         return cardRepository.findByIdentifier(command.getIdentifier())
-                .switchIfEmpty(Mono.error(buildException(MessagesEnum.CARD_NOT_FOUND)))
+                .switchIfEmpty(Mono.error(BusinessException.fromMessage(MessagesEnum.CARD_NOT_FOUND)))
                 .flatMap(card -> {
                     if (!CardStatusEnum.ENROLLED.equals(card.getStatus())) {
-                        return Mono.error(buildException(MessagesEnum.CARD_NOT_ENROLLED));
+                        return Mono.error(BusinessException.fromMessage(MessagesEnum.CARD_NOT_ENROLLED));
                     }
                     var transaction = Transaction.builder()
                             .cardId(card.getId())
@@ -36,13 +36,5 @@ public class CreateTransactionUseCase {
                             .build();
                     return transactionRepository.save(transaction);
                 });
-    }
-
-    private BusinessException buildException(MessagesEnum messagesEnum) {
-        return new BusinessException(
-                messagesEnum.getMessage(),
-                messagesEnum.getOperationCode(),
-                messagesEnum.getCode()
-        );
     }
 }

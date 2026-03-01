@@ -22,16 +22,12 @@ public class CardRepositoryAdapter extends ReactiveAdapterOperations<Card,CardEn
     @Override
     public Mono<Card> save(Card card) {
         return super.save(card)
-                .onErrorMap(DataIntegrityViolationException.class, e -> toBusinessException(MessagesEnum.CARD_ALREADY_EXISTS))
-                .onErrorMap(e -> !(e instanceof BusinessException), e -> toBusinessException(MessagesEnum.PERSISTENCE_ERROR));
+                .onErrorMap(DataIntegrityViolationException.class, e -> BusinessException.fromMessage(MessagesEnum.CARD_ALREADY_EXISTS))
+                .onErrorMap(e -> !(e instanceof BusinessException), e -> BusinessException.fromMessage(MessagesEnum.PERSISTENCE_ERROR));
     }
 
     @Override
     public Mono<Card> findByIdentifier(String identifier) {
         return repository.findByIdentifier(identifier).map(this::toEntity);
-    }
-
-    private BusinessException toBusinessException(MessagesEnum msg) {
-        return new BusinessException(msg.getMessage(), msg.getOperationCode(), msg.getCode());
     }
 }

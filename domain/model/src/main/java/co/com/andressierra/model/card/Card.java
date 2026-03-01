@@ -48,8 +48,7 @@ public class Card {
             byte[] hash = digest.digest((pan + createdAt.toLocalDate()).getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(hash).substring(0, 16);
         } catch (NoSuchAlgorithmException e) {
-            var error = MessagesEnum.CARD_IDENTIFIER_ERROR;
-            throw new BusinessException(error.getMessage(), error.getOperationCode(), error.getCode());
+            throw BusinessException.fromMessage(MessagesEnum.CARD_IDENTIFIER_ERROR);
         }
     }
 }

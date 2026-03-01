@@ -22,16 +22,12 @@ public class TransactionRepositoryAdapter extends ReactiveAdapterOperations<Tran
     @Override
     public Mono<Transaction> save(Transaction transaction) {
         return super.save(transaction)
-                .onErrorMap(DataIntegrityViolationException.class, e -> toBusinessException(MessagesEnum.TRANSACTION_ALREADY_EXISTS))
-                .onErrorMap(e -> !(e instanceof BusinessException), e -> toBusinessException(MessagesEnum.PERSISTENCE_ERROR));
+                .onErrorMap(DataIntegrityViolationException.class, e -> BusinessException.fromMessage(MessagesEnum.TRANSACTION_ALREADY_EXISTS))
+                .onErrorMap(e -> !(e instanceof BusinessException), e -> BusinessException.fromMessage(MessagesEnum.PERSISTENCE_ERROR));
     }
 
     @Override
     public Mono<Transaction> findByReference(String reference) {
         return repository.findByReference(reference).map(this::toEntity);
-    }
-
-    private BusinessException toBusinessException(MessagesEnum msg) {
-        return new BusinessException(msg.getMessage(), msg.getOperationCode(), msg.getCode());
     }
 }
