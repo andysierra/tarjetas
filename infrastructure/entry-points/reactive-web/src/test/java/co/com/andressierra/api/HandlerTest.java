@@ -9,6 +9,7 @@ import co.com.andressierra.model.card.enums.CardTypeEnum;
 import co.com.andressierra.model.exception.BusinessException;
 import co.com.andressierra.model.transaction.Transaction;
 import co.com.andressierra.model.transaction.enums.TransactionStatusEnum;
+import co.com.andressierra.usecase.canceltransaction.CancelTransactionUseCase;
 import co.com.andressierra.usecase.createcard.CreateCardUseCase;
 import co.com.andressierra.usecase.createtransaction.CreateTransactionUseCase;
 import co.com.andressierra.usecase.deletecard.DeleteCardUseCase;
@@ -51,6 +52,9 @@ class HandlerTest {
 
     @Mock
     private GetTransactionUseCase getTransactionUseCase;
+
+    @Mock
+    private CancelTransactionUseCase cancelTransactionUseCase;
 
     @InjectMocks
     private Handler handler;
@@ -294,6 +298,58 @@ class HandlerTest {
                 .build();
 
         StepVerifier.create(handler.getTransaction(serverRequest))
+                .assertNext(res -> assertEquals(400, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldCancelTransaction() {
+        Transaction transaction = Transaction.builder()
+                .cardId(1L)
+                .reference("123456")
+                .totalAmount(new BigDecimal("50000.00"))
+                .address("Calle 123")
+                .status(TransactionStatusEnum.CANCELLED)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        when(cancelTransactionUseCase.cancel("123456")).thenReturn(Mono.just(transaction));
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .pathVariable("reference", "123456")
+                .build();
+
+        StepVerifier.create(handler.cancelTransaction(serverRequest))
+                .assertNext(res -> assertEquals(200, res.statusCode().value()))
+                .verifyComplete();
+
+        verify(cancelTransactionUseCase).cancel("123456");
+    }
+
+    @Test
+    void shouldReturn400WhenTransactionNotFoundOnCancel() {
+        when(cancelTransactionUseCase.cancel("999999"))
+                .thenReturn(Mono.error(new BusinessException("Numero de referencia invalido", "43", 400)));
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .pathVariable("reference", "999999")
+                .build();
+
+        StepVerifier.create(handler.cancelTransaction(serverRequest))
+                .assertNext(res -> assertEquals(400, res.statusCode().value()))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturn400WhenTransactionTooOldToCancel() {
+        when(cancelTransactionUseCase.cancel("123456"))
+                .thenReturn(Mono.error(new BusinessException("No se puede anular transaccion por su antiguedad", "44", 400)));
+
+        MockServerRequest serverRequest = MockServerRequest.builder()
+                .pathVariable("reference", "123456")
+                .build();
+
+        StepVerifier.create(handler.cancelTransaction(serverRequest))
                 .assertNext(res -> assertEquals(400, res.statusCode().value()))
                 .verifyComplete();
     }

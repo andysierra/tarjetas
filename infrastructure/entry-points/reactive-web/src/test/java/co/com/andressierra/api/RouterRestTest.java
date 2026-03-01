@@ -3,6 +3,7 @@ package co.com.andressierra.api;
 import co.com.andressierra.model.card.Card;
 import co.com.andressierra.model.card.enums.CardStatusEnum;
 import co.com.andressierra.model.card.enums.CardTypeEnum;
+import co.com.andressierra.usecase.canceltransaction.CancelTransactionUseCase;
 import co.com.andressierra.usecase.createcard.CreateCardUseCase;
 import co.com.andressierra.usecase.createtransaction.CreateTransactionUseCase;
 import co.com.andressierra.usecase.deletecard.DeleteCardUseCase;
@@ -52,6 +53,9 @@ class RouterRestTest {
 
     @MockitoBean
     private GetTransactionUseCase getTransactionUseCase;
+
+    @MockitoBean
+    private CancelTransactionUseCase cancelTransactionUseCase;
 
     @Test
     void createCard_shouldReturn201() {

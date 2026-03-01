@@ -6,6 +6,7 @@ import co.com.andressierra.api.rest.request.CreateCardRequest;
 import co.com.andressierra.api.rest.request.CreateTransactionRequest;
 import co.com.andressierra.api.rest.request.EnrollCardRequest;
 import co.com.andressierra.model.messages.MessagesEnum;
+import co.com.andressierra.usecase.canceltransaction.CancelTransactionUseCase;
 import co.com.andressierra.usecase.createcard.CreateCardUseCase;
 import co.com.andressierra.usecase.createtransaction.CreateTransactionUseCase;
 import co.com.andressierra.usecase.deletecard.DeleteCardUseCase;
@@ -31,6 +32,7 @@ public class Handler {
     private final DeleteCardUseCase deleteCardUseCase;
     private final CreateTransactionUseCase createTransactionUseCase;
     private final GetTransactionUseCase getTransactionUseCase;
+    private final CancelTransactionUseCase cancelTransactionUseCase;
 
     public Mono<ServerResponse> createCard(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CreateCardRequest.class)
@@ -76,6 +78,9 @@ public class Handler {
     }
 
     public Mono<ServerResponse> cancelTransaction(ServerRequest serverRequest) {
-        return ServerResponse.ok().build();
+        String reference = serverRequest.pathVariable(REFERENCE_PATH_VARIABLE);
+        return cancelTransactionUseCase.cancel(reference)
+                .flatMap(tx -> ResponseBuilder.success(Mapper.toCreateTransactionResponse(tx), MessagesEnum.TRANSACTION_CANCELLED))
+                .onErrorResume(ResponseBuilder::handleError);
     }
 }
