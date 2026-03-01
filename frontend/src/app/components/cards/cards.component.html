@@ -1,0 +1,123 @@
+<div class="panel">
+  <h2>Tarjetas</h2>
+
+  <!-- CREATE FORM -->
+  <div class="form-container">
+    <h3>Crear Tarjeta</h3>
+    <form [formGroup]="createForm" (ngSubmit)="onCreate()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>PAN (16-19 digitos)</label>
+          <input formControlName="pan" placeholder="4567890123456789">
+          @if (createForm.get('pan')?.invalid && createForm.get('pan')?.touched) {
+            <span class="error-text">PAN debe tener entre 16 y 19 digitos</span>
+          }
+        </div>
+        <div class="form-group">
+          <label>Titular</label>
+          <input formControlName="cardholderName" placeholder="Nombre completo">
+          @if (createForm.get('cardholderName')?.invalid && createForm.get('cardholderName')?.touched) {
+            <span class="error-text">Titular es requerido</span>
+          }
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Cedula (10-15 caracteres)</label>
+          <input formControlName="cardholderId" placeholder="1234567890">
+          @if (createForm.get('cardholderId')?.invalid && createForm.get('cardholderId')?.touched) {
+            <span class="error-text">Cedula debe tener entre 10 y 15 caracteres</span>
+          }
+        </div>
+        <div class="form-group">
+          <label>Tipo</label>
+          <select formControlName="cardType">
+            <option value="">Seleccione...</option>
+            <option value="CREDIT">Credito</option>
+            <option value="DEBIT">Debito</option>
+          </select>
+          @if (createForm.get('cardType')?.invalid && createForm.get('cardType')?.touched) {
+            <span class="error-text">Tipo es requerido</span>
+          }
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Telefono (10 digitos)</label>
+          <input formControlName="phoneNumber" placeholder="3001234567">
+          @if (createForm.get('phoneNumber')?.invalid && createForm.get('phoneNumber')?.touched) {
+            <span class="error-text">Telefono debe tener 10 digitos</span>
+          }
+        </div>
+        <div class="form-group"></div>
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="createForm.invalid">Crear Tarjeta</button>
+    </form>
+  </div>
+
+  <!-- CARDS TABLE -->
+  <div class="table-container">
+    <h3>Tarjetas Registradas</h3>
+    @if (cards$ | async; as cards) {
+      @if (cards.length > 0) {
+        <table>
+          <thead>
+            <tr>
+              <th>PAN Enmascarado</th>
+              <th>Titular</th>
+              <th>Cedula</th>
+              <th>Telefono</th>
+              <th>Estado</th>
+              <th>Identificador</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (card of cards; track card.identifier) {
+              <tr>
+                <td>{{ card.maskedPan }}</td>
+                <td>{{ card.cardholderName }}</td>
+                <td>{{ card.cardholderId }}</td>
+                <td>{{ card.phoneNumber }}</td>
+                <td [class]="'status-' + card.status.toLowerCase()">{{ card.status }}</td>
+                <td><code>{{ card.identifier }}</code></td>
+                <td class="actions-cell">
+                  @if (card.status === 'CREATED') {
+                    <button class="btn btn-enroll" (click)="openEnroll(card.identifier)">Enrolar</button>
+                  }
+                  @if (card.status !== 'INACTIVE') {
+                    <button class="btn btn-delete" (click)="onDelete(card.identifier)">Eliminar</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="empty-msg">No hay tarjetas registradas</p>
+      }
+    }
+  </div>
+</div>
+
+<!-- ENROLL MODAL -->
+@if (showEnrollModal) {
+  <div class="modal-overlay" (click)="closeEnroll()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Enrolar Tarjeta</h3>
+      <form [formGroup]="enrollForm" (ngSubmit)="onEnroll()">
+        <div class="form-group">
+          <label>Numero de Validacion</label>
+          <input type="number" formControlName="validationNumber" min="1" max="100">
+          @if (enrollForm.get('validationNumber')?.invalid && enrollForm.get('validationNumber')?.touched) {
+            <span class="error-text">Debe ser un numero entre 1 y 100</span>
+          }
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="enrollForm.invalid">Enrolar</button>
+          <button type="button" class="btn btn-cancel" (click)="closeEnroll()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -1,0 +1,77 @@
+<div class="panel">
+  <h2>Transacciones</h2>
+
+  <!-- CREATE TRANSACTION FORM -->
+  <div class="form-container">
+    <h3>Realizar Pago</h3>
+    <form [formGroup]="createForm" (ngSubmit)="onCreate()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Identificador Tarjeta</label>
+          <input formControlName="identifier" placeholder="Identificador de la tarjeta">
+          @if (createForm.get('identifier')?.invalid && createForm.get('identifier')?.touched) {
+            <span class="error-text">Identificador es requerido</span>
+          }
+        </div>
+        <div class="form-group">
+          <label>Referencia (6 digitos)</label>
+          <input formControlName="reference" placeholder="000001">
+          @if (createForm.get('reference')?.invalid && createForm.get('reference')?.touched) {
+            <span class="error-text">Debe ser 6 digitos</span>
+          }
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Total Compra</label>
+          <input type="number" formControlName="totalAmount" placeholder="50000.00" step="0.01">
+          @if (createForm.get('totalAmount')?.invalid && createForm.get('totalAmount')?.touched) {
+            <span class="error-text">Monto debe ser mayor a 0</span>
+          }
+        </div>
+        <div class="form-group">
+          <label>Direccion</label>
+          <input formControlName="address" placeholder="Calle 123">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="createForm.invalid">Pagar</button>
+    </form>
+  </div>
+
+  <!-- TRANSACTIONS TABLE -->
+  <div class="table-container">
+    <h3>Transacciones Registradas</h3>
+    @if (transactions$ | async; as transactions) {
+      @if (transactions.length > 0) {
+        <table>
+          <thead>
+            <tr>
+              <th>Referencia</th>
+              <th>Monto</th>
+              <th>Direccion</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (tx of transactions; track tx.reference) {
+              <tr>
+                <td><code>{{ tx.reference }}</code></td>
+                <td>{{ tx.totalAmount | currency:'COP':'symbol-narrow':'1.2-2' }}</td>
+                <td>{{ tx.address || '-' }}</td>
+                <td [class]="'status-' + tx.status.toLowerCase()">{{ tx.status }}</td>
+                <td class="actions-cell">
+                  @if (tx.status === 'APPROVED') {
+                    <button class="btn btn-cancel-tx" (click)="onCancel(tx.reference)">Anular</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="empty-msg">No hay transacciones registradas</p>
+      }
+    }
+  </div>
+</div>
